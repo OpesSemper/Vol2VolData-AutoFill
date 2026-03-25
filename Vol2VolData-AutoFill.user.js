@@ -26,11 +26,18 @@ let etagCommit = null;
 let lastPopup = null;
 
 function fetchURL(url) {
+    
     return new Promise(resolve => {
         GM_xmlhttpRequest({
             method: "GET",
             url: url,
-            onload: r => resolve(r.status === 200 ? r.responseText : null),
+            onload: r => {
+                if (r.status === 200){
+                    console.log("Fetch data from", url, "successful")
+                }
+                
+                resolve(r.status === 200 ? r.responseText : null)
+            },
             onerror: () => resolve(null)
         });
     });
