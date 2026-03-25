@@ -8,6 +8,7 @@
 // @icon         https://raw.githubusercontent.com/pageth/Vol2VolData-AutoFill/refs/heads/main/tradingview.ico
 // @grant        GM_xmlhttpRequest
 // @connect      raw.githubusercontent.com
+// @connect      api.github.com
 // @downloadURL  https://raw.githubusercontent.com/pageth/Vol2VolData-AutoFill/main/Vol2VolData-AutoFill.user.js
 // @updateURL    https://raw.githubusercontent.com/pageth/Vol2VolData-AutoFill/main/Vol2VolData-AutoFill.user.js
 // ==/UserScript==
