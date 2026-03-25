@@ -16,7 +16,7 @@ Auto fill Intraday & OI data for indicator on TradingView.
 
 ### Install Script
 
-<a href="https://raw.githubusercontent.com/pageth/Vol2VolData-AutoFill/main/Vol2VolData-AutoFill.user.js">
+<a href="https://raw.githubusercontent.com/OpesSemper/Vol2VolData-AutoFill/main/Vol2VolData-AutoFill.user.js">
 <img src="https://img.shields.io/badge/INSTALL%20SCRIPT-Tampermonkey-blue?style=for-the-badge&logo=tampermonkey">
 </a>
 
