@@ -50,25 +50,8 @@ async function buildRawURLs(sha) {
     };
 }
     
-async function fetchAll() {
-    const res = await fetchLatestSHA();
-
-    if (res.status === "NOT_MODIFIED") {
-        return; // ไม่มี commit ใหม่
-    }
-
-    if (res.status !== "OK") {
-        console.log("Commit fetch error");
-        return;
-    }
-
-    if (latestSHA === res.sha) return;
-    const urls = await buildRawURLs(res.sha)
-
-    console.log("🚀 New SHA:", res.sha, urls);
-
-    latestSHA = res.sha;
-
+async function fetchAll(commitSHA) {
+    const urls = await buildRawURLs(commitSHA)
     const [intraday, oi] = await Promise.all([
         //const URL_INTRADAY = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/IntradayData.txt`;
         //const URL_OI       = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/OIData.txt`;
@@ -176,7 +159,23 @@ async function runAutofill() {
     const popup = taIntraday?.closest('[role="dialog"]')
         || taOI?.closest('[role="dialog"]');
 
-    if (!popup || popup === lastPopup) return;
+    // fetch last SHA
+    
+    const res = await fetchLatestSHA();
+
+    if (res.status === "NOT_MODIFIED") {
+        return; // ไม่มี commit ใหม่
+    }
+
+    if (res.status !== "OK") {
+        console.log("Commit fetch error");
+        return;
+    }
+
+    if (!popup || popup === lastPopup || latestSHA === res.sha) return;
+    
+    latestSHA = res.sha;
+    console.log("🚀 New SHA:", res.sha, urls);
 
     lastPopup = popup;
 
@@ -185,7 +184,7 @@ async function runAutofill() {
     setColor(taIntraday, "#6b6b00");
     setColor(taOI, "#6b6b00");
 
-    const data = await fetchAll();
+    const data = await fetchAll(res.sha);
 
     if (taIntraday) {
         if (data.intraday) {
