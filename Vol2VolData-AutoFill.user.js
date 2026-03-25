@@ -63,13 +63,12 @@ async function fetchAll() {
     }
 
     if (latestSHA === res.sha) return;
+    const { URL_INTRADAY, URL_OI } = await buildRawURLs(res.sha)
 
-    console.log("🚀 New SHA:", res.sha);
+    console.log("🚀 New SHA:", res.sha, URL_INTRADAY, URL_OI);
 
     latestSHA = res.sha;
 
-    const { URL_INTRADAY, URL_OI } = await buildRawURLs(res.sha)
-    
     const [intraday, oi] = await Promise.all([
         //const URL_INTRADAY = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/IntradayData.txt`;
         //const URL_OI       = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/OIData.txt`;
