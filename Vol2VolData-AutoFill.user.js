@@ -175,7 +175,7 @@ async function runAutofill() {
     if (!popup || popup === lastPopup || latestSHA === res.sha) return;
     
     latestSHA = res.sha;
-    console.log("🚀 New SHA:", res.sha, urls);
+    console.log("🚀 New SHA:", res.sha);
 
     lastPopup = popup;
 
