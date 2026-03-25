@@ -15,28 +15,96 @@
 (function () {
 "use strict";
 
-const URL_INTRADAY = "https://raw.githubusercontent.com/pageth/Vol2VolData/main/IntradayData.txt";
-const URL_OI       = "https://raw.githubusercontent.com/pageth/Vol2VolData/main/OIData.txt";
 
+const OWNER = "pageth";
+const REPO  = "Vol2VolData";
+const BRANCH = "main";
+
+let latestSHA = BRANCH;
+let etagCommit = null;
 let lastPopup = null;
 
 function fetchURL(url) {
     return new Promise(resolve => {
         GM_xmlhttpRequest({
             method: "GET",
-            url: url + "?t=" + Date.now(),
+            url: url,
             onload: r => resolve(r.status === 200 ? r.responseText : null),
             onerror: () => resolve(null)
         });
     });
 }
 
+async function buildRawURLs(sha) {
+    return {
+        intraday: `https://raw.githubusercontent.com/${OWNER}/${REPO}/${sha}/IntradayData.txt`,
+        oi:       `https://raw.githubusercontent.com/${OWNER}/${REPO}/${sha}/OIData.txt`
+    };
+}
+    
 async function fetchAll() {
+    const res = await fetchLatestSHA();
+
+    if (res.status === "NOT_MODIFIED") {
+        return; // ไม่มี commit ใหม่
+    }
+
+    if (res.status !== "OK") {
+        console.log("Commit fetch error");
+        return;
+    }
+
+    if (latestSHA === res.sha) return;
+
+    console.log("🚀 New SHA:", res.sha);
+
+    latestSHA = res.sha;
+
+    const { URL_INTRADAY, URL_OI } = await buildRawURLs(res.sha)
+    
     const [intraday, oi] = await Promise.all([
+        //const URL_INTRADAY = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/IntradayData.txt`;
+        //const URL_OI       = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${latestSHA}/OIData.txt`;
+    
         fetchURL(URL_INTRADAY),
         fetchURL(URL_OI)
     ]);
     return { intraday, oi };
+}
+
+function fetchLatestSHA() {
+    return new Promise(resolve => {
+        const url = `https://api.github.com/repos/${OWNER}/${REPO}/commits/${BRANCH}`;
+
+        GM_xmlhttpRequest({
+            method: "GET",
+            url,
+            headers: {
+                ...(etagCommit && { "If-None-Match": etagCommit }),
+                "Accept": "application/vnd.github+json"
+            },
+            onload: r => {
+                if (r.status === 304) {
+                    return resolve({ status: "NOT_MODIFIED" });
+                }
+
+                if (r.status !== 200) {
+                    return resolve({ status: "ERROR" });
+                }
+
+                const match = r.responseHeaders.match(/etag:\s*(.*)/i);
+                if (match) etagCommit = match[1];
+
+                const data = JSON.parse(r.responseText);
+                
+                resolve({
+                    status: "OK",
+                    sha: data.sha
+                });
+            },
+            onerror: () => resolve({ status: "ERROR" })
+        });
+    });
 }
 
 function fillReact(el, data) {
